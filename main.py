@@ -13,80 +13,69 @@ from colorama import init, Fore, Style
 init()
 
 def print_banner():
-    banner = f"""
-{Fore.CYAN}
-   ██████╗██╗   ██╗██╗  ████████╗   ██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗ 
-  ██╔════╝██║   ██║██║  ╚══██╔══╝   ██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗
-  ██║     ██║   ██║██║     ██║      ██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║
-  ██║     ██║   ██║██║     ██║      ██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║
-  ╚██████╗╚██████╔╝███████╗██║      ╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝
-   ╚═════╝ ╚═════╝ ╚══════╝╚═╝       ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ 
-                                                                       
-{Fore.GREEN}╔══════════════════════════════════════════════════════════════════╗
-║          Auto Referral Generator - Created by IM-Hanzou          ║
-║                 https://github.com/IM-Hanzou                     ║
-╚══════════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
-"""
-    print(banner)
+    print(f"{Fore.CYAN}  _____        _             __    \n"
+          f" / ___/ _____ (_)____   ____/ /____\n"
+          f" \\__ \\ / ___// // __ \\ / __  // __ \\ \n"
+          f" ___/ // /__ / // / / // /_/ // /_/ /\n"
+          f"/____/ \\___//_//_/ /_/ \\__,_/ \\____/\n"
+          f"\nScindo | Cult.World Multi Auto Referrals{Style.RESET_ALL}")
 
-def load_proxies(filename):
-    with open(filename, 'r') as f:
-        return [line.strip() for line in f if line.strip()]
+def log_message(message, status="info"):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    status_map = {
+        "success": Fore.GREEN,
+        "error": Fore.RED,
+        "warning": Fore.YELLOW,
+        "info": Fore.BLUE
+    }
+    color = status_map.get(status, Fore.BLUE)
+    print(f"{color}[{timestamp}] {message}{Style.RESET_ALL}")
 
-def save_wallet(private_key, address):
-    with open('wallets.txt', 'a') as f:
+def load_list(filename):
+    try:
+        with open(filename, 'r') as f:
+            return [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        return []
+
+def save_wallet(ref_code, private_key, address):
+    filename = f"{ref_code}.txt"
+    with open(filename, 'a') as f:
         f.write(f"{private_key}:{address}\n")
 
-def get_random_proxy(proxies):
-    return random.choice(proxies)
+def get_unused_proxy(proxies, used_proxies):
+    available = list(set(proxies) - set(used_proxies))
+    if not available:
+        used_proxies.clear()
+        available = proxies.copy()
+    proxy = random.choice(available)
+    used_proxies.add(proxy)
+    return proxy
 
-def get_ip_info(proxy):
-    try:
-        response = requests.get('http://ip-api.com/json', 
-                              proxies={'http': proxy, 'https': proxy}, 
-                              timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            return f"{data.get('query', 'Unknown')} ({data.get('country', 'Unknown')})"
-    except:
-        return "IP lookup failed"
-    
 def create_wallet():
     priv = secrets.token_hex(32)
     private_key = "0x" + priv
     acct = Account.from_key(private_key)
     return private_key, acct.address
 
-def log_message(message, status="info"):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    if status == "success":
-        print(f"{Fore.GREEN}[{timestamp}] ✔ {message}{Style.RESET_ALL}")
-    elif status == "error":
-        print(f"{Fore.RED}[{timestamp}] ✖ {message}{Style.RESET_ALL}")
-    elif status == "warning":
-        print(f"{Fore.YELLOW}[{timestamp}] ⚠ {message}{Style.RESET_ALL}")
-    else:
-        print(f"{Fore.BLUE}[{timestamp}] ℹ {message}{Style.RESET_ALL}")
-
-def get_challenge(address, proxy):
-    url = "https://cults-apis-1181.ippcoin.com/auth/challenge"
-    headers = {
+def get_headers():
+    return {
         'accept': 'application/json, text/plain, */*',
         'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
         'content-type': 'application/json',
         'origin': 'https://cult.world',
         'referer': 'https://cult.world/',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0'
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36'
     }
+
+def get_challenge(address, proxy):
+    url = "https://cults-apis-1181.ippcoin.com/auth/challenge"
     data = {"wallet_address": address}
-    
     try:
-        response = requests.post(url, headers=headers, json=data, proxies={'http': proxy, 'https': proxy})
+        response = requests.post(url, headers=get_headers(), json=data, proxies={'http': proxy, 'https': proxy})
         if response.status_code == 200:
-            return response.json()['data']['challenge']
-        return None
-    except Exception as e:
-        log_message(f"Error getting challenge: {e}", "error")
+            return response.json().get('data', {}).get('challenge')
+    except:
         return None
 
 def sign_message(private_key, challenge):
@@ -96,82 +85,43 @@ def sign_message(private_key, challenge):
 
 def login(address, challenge, signature, proxy, ref_code):
     url = "https://cults-apis-1181.ippcoin.com/auth/login"
-    headers = {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-        'content-type': 'application/json',
-        'origin': 'https://cult.world',
-        'referer': 'https://cult.world/',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0'
-    }
-    data = {
-        "wallet_address": address,
-        "challenge": challenge,
-        "response": signature,
-        "referral_code": ref_code
-    }
-    
+    data = {"wallet_address": address, "challenge": challenge, "response": signature, "referral_code": ref_code}
     try:
-        response = requests.post(url, headers=headers, json=data, proxies={'http': proxy, 'https': proxy})
+        response = requests.post(url, headers=get_headers(), json=data, proxies={'http': proxy, 'https': proxy})
         return response.json()
-    except Exception as e:
-        log_message(f"Error logging in: {e}", "error")
+    except:
         return None
 
 def main():
     print_banner()
-    
-    ref_code = input(f"{Fore.CYAN}Please enter your referral code: {Style.RESET_ALL}").strip()
-    
-    if not ref_code:
-        log_message("No referral code provided. Exiting...", "error")
+    proxies = load_list('proxies.txt')
+    ref_codes = load_list('refs.txt')
+    if not proxies or not ref_codes:
+        log_message("Missing proxies or referral codes!", "error")
         return
-
-    proxies = load_proxies('proxies.txt')
-    if not proxies:
-        log_message("No proxies found in proxies.txt", "error")
-        return
-
-    log_message(f"Using referral code: {ref_code}", "info")
-    log_message("Starting wallet generation and registration process...")
-    log_message("Press Ctrl+C to stop", "warning")
     
+    used_proxies = set()
     wallet_count = 0
     
     try:
         while True:
             wallet_count += 1
-            proxy = get_random_proxy(proxies)
-            ip_info = get_ip_info(proxy)
+            proxy = get_unused_proxy(proxies, used_proxies)
+            ref_code = random.choice(ref_codes)
             private_key, address = create_wallet()
-            
-            log_message(f"Wallet #{wallet_count}")
-            log_message(f"Address: {address}")
-            log_message(f"IP: {ip_info}")
-            
+            log_message(f"Created Wallet #{wallet_count} - Address: {address} - Using Referral: {ref_code}")
             challenge = get_challenge(address, proxy)
             if not challenge:
                 log_message("Failed to get challenge, skipping wallet", "error")
                 continue
-                
             signature = sign_message(private_key, challenge)
             login_result = login(address, challenge, signature, proxy, ref_code)
-            
             if login_result and login_result.get('status') == 200:
-                log_message("Successfully registered wallet!", "success")
-                save_wallet(private_key, address)
-                log_message(f"Referral code: {login_result['data'].get('referral_code', 'N/A')}", "success")
-                log_message("=" * 50)
-            else:
-                log_message("Failed to register wallet", "error")
-                log_message("=" * 50)
-            
+                save_wallet(ref_code, private_key, address)
+                log_message(f"Wallet {wallet_count} registered successfully under referral {ref_code}!", "success")
     except KeyboardInterrupt:
-        log_message("\nStopping wallet generation...", "warning")
-        log_message(f"Total wallets processed: {wallet_count}", "info")
+        log_message(f"\nStopping... Total wallets: {wallet_count}", "warning")
         sys.exit(0)
-    except Exception as e:
-        log_message(f"An error occurred: {e}", "error")
 
 if __name__ == "__main__":
     main()
