@@ -18,7 +18,7 @@ def print_banner():
           f" \\__ \\ / ___// // __ \\ / __  // __ \\ \n"
           f" ___/ // /__ / // / / // /_/ // /_/ /\n"
           f"/____/ \\___//_//_/ /_/ \\__,_/ \\____/\n"
-          f"\nScindo | Cult.World Multi Auto Referrals{Style.RESET_ALL}")
+          f"\nKelliark | Cult.World Multi Auto Referrals{Style.RESET_ALL}")
 
 def log_message(message, status="info"):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
