@@ -33,7 +33,7 @@ python main.py
 ```
 
 ## File Output
-Each successfully registered wallet will be stored in a file named after the referral code used, e.g., `dquov4hraoo6.txt`.
+Each successfully registered wallet will be stored in a file named after the referral code used, e.g., `28Djwk291sw.txt`.
 
 ## Dependencies
 - `requests`
