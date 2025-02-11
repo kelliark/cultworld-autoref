@@ -1,6 +1,6 @@
 # Cult.World Multi Auto Referrals
 
-## 🚀 UPGRADED Features v2.0
+## 🚀 UPGRADED Features
 - **Smart Proxy Distribution**: 
   - Automatically calculates maximum accounts based on available proxies
   - Evenly distributes proxies across all referral codes
