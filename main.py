@@ -20,7 +20,7 @@ def print_banner():
  ___/ // /__ / // / / // /_/ // /_/ /
 /____/ \___//_//_/ /_/ \__,_/ \____/
 
-KELLIARK | Cult.World Multi Auto Referrals{Style.RESET_ALL}
+Kelliark | Cult.World Multi Auto Referrals{Style.RESET_ALL}
 """)
 
 def log_message(wallet_count, address, ip, ref_code, status="info", message=""):
