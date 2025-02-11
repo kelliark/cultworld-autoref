@@ -125,17 +125,17 @@ def login(address, challenge, signature, proxy, ref_code):
 def calculate_max_accounts(proxy_count, ref_count):
     # Distribute proxies evenly among referral codes
     # Each proxy can be used twice
-    max_per_ref = (proxy_count * 2) // ref_count
+    max_per_ref = proxy_count // ref_count
     return max_per_ref
 
 def get_user_input(proxy_count, ref_count):
     while True:
         try:
-            max_possible = (proxy_count * 2) // ref_count
+            max_possible = proxy_count // ref_count
             
             print(f"\n{Fore.CYAN + Style.BRIGHT}Available Proxies: {proxy_count:,}")
-            print(f"Maximum accounts per referral: {max_possible:,}")
-            print(f"Total accounts possible: {max_possible * ref_count:,}{Style.RESET_ALL}")
+            print(f"Accounts per referral: {max_possible:,}")
+            print(f"Total accounts: {max_possible * ref_count:,}{Style.RESET_ALL}")
             
             accounts = input(f"\n{Fore.WHITE + Style.BRIGHT}Enter number of accounts per referral (max {max_possible:,}): {Style.RESET_ALL}")
             accounts = int(accounts)
