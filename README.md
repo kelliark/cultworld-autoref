@@ -31,7 +31,7 @@ This project automates wallet creation and referral signups for Cult.World using
 ## Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/multi-referral-proxy.git
+   git clone https://github.com/kelliark/cultworld-autoref.git
    cd cultworld-autoref
    ```
 2. Install dependencies:
